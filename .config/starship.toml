@@ -1,0 +1,92 @@
+# ディレクトリ(紺) -> 矢印 -> Git(黄) -> 矢印 -> 改行 -> 入力欄
+format = """
+[](fg:#3B4252)\
+$directory\
+[](fg:#3B4252 bg:#EBCB8B)\
+$git_branch\
+$git_status\
+$python\
+[](fg:#EBCB8B)\
+$line_break\
+$character"""
+
+# 右側のプロンプト（コマンド実行時間 -> 時刻）
+right_format = """
+[](fg:#2E3440)\
+$cmd_duration\
+$time\
+[](fg:#2E3440)\
+"""
+
+# コマンドラインに1行分のスペースを入れる
+add_newline = true
+
+# =======================================================
+# 各モジュールの設定
+# =======================================================
+
+[directory]
+style = "fg:#D8DEE9 bg:#3B4252"  # 白文字 / 紺背景
+format = "[ $path ]($style)"
+truncation_length = 3
+truncate_to_repo = false
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+[git_branch]
+symbol = ""
+style = "bg:#EBCB8B fg:#2E3440"
+format = '[ $symbol $branch ]($style)'
+
+[git_status]
+style = "bg:#EBCB8B"
+format = '[[($all_status$ahead_behind )](fg:#2E3440 bg:#EBCB8B)]($style)'
+# アイコン設定（数字などを表示）
+untracked = "?${count}"
+modified = "!${count}"
+staged = "+${count}"
+renamed = "»${count}"
+deleted = "✘${count}"
+
+[cmd_duration]
+min_time = 5000
+style = "fg:#D8DEE9 bg:#2E3440"
+format = '[ $duration ]($style)[]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "fg:#D8DEE9 bg:#2E3440"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = '[V](bold green)'
+
+[python]
+symbol = ""
+# Git部分と同じ配色にして違和感をなくす
+style = "bg:#EBCB8B fg:#2E3440"
+# 区切り線(|)を入れて表示
+format = '[ | ${symbol} ${virtualenv} ]($style)'
+
+# =======================================================
+# 不要な機能の無効化
+# =======================================================
+[aws]
+disabled = true
+[gcloud]
+disabled = true
+[nodejs]
+disabled = true
+[ruby]
+disabled = true
+[package]
+disabled = true
+
