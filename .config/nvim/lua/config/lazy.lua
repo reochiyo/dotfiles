@@ -20,6 +20,20 @@ require("lazy").setup({
     { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = {
       colorscheme = "solarized-osaka",
     } },
+    -- Python support (pyright LSP + ruff linting/formatting)
+    { import = "lazyvim.plugins.extras.lang.python" },
+    -- TypeScript/React support
+    { import = "lazyvim.plugins.extras.lang.typescript" },
+    -- Tailwind CSS (React開発でよく使用)
+    { import = "lazyvim.plugins.extras.lang.tailwind" },
+    -- ESLint
+    { import = "lazyvim.plugins.extras.linting.eslint" },
+    -- Prettier (フォーマッター)
+    { import = "lazyvim.plugins.extras.formatting.prettier" },
+    -- Debug adapter protocol
+    { import = "lazyvim.plugins.extras.dap.core" },
+    -- Test runner (neotest)
+    { import = "lazyvim.plugins.extras.test.core" },
     -- import/override with your plugins
     { import = "plugins" },
   },

@@ -56,7 +56,7 @@ return {
   {
     "rcarriga/nvim-notify",
     opts = {
-      timeout = 5000,
+      timeout = 10000,
     },
   },
 
@@ -86,12 +86,14 @@ return {
     },
   },
 
-
   -- statusline
   {
     "nvim-lualine/lualine.nvim",
     opts = function(_, opts)
       local LazyVim = require("lazyvim.util")
+      opts.options = {
+        theme = "solarized-osaka",
+      }
       opts.sections.lualine_c[4] = {
         LazyVim.lualine.pretty_path({
           length = 0,
@@ -122,5 +124,32 @@ return {
   {
     "MeanderingProgrammer/render-markdown.nvim",
     enabled = false,
+  },
+
+  -- dashboard
+  {
+    "folke/snacks.nvim",
+    opts = {
+      dashboard = {
+        sections = {
+          { section = "header" },
+          -- Recent Files (最近開いたファイル)
+          { icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
+          -- Projects (プロジェクト履歴)
+          { icon = " ", title = "Projects", section = "projects", indent = 2, padding = 1 },
+          -- Git Status の表示
+          {
+            icon = "󰊢 ",
+            title = "Git Status",
+            section = "terminal",
+            cmd = "git status -short",
+            pane = 2,
+            height = 5,
+            padding = 1,
+          },
+          { section = "startup" },
+        },
+      },
+    },
   },
 }
