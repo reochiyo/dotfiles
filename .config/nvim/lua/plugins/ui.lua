@@ -64,6 +64,14 @@ return {
     "snacks.nvim",
     opts = {
       scroll = { enabled = false },
+      picker = {
+        sources = {
+          explorer = {
+            hidden = true,
+            ignored = true,
+          },
+        },
+      },
     },
     keys = {},
   },
@@ -105,6 +113,8 @@ return {
           readonly_icon = " 󰌾 ",
         }),
       }
+      opts.winbar = {}
+      opts.inactive_winbar = {}
     end,
   },
 
@@ -126,6 +136,39 @@ return {
     enabled = false,
   },
 
+  -- filename on splits
+  {
+    "b0o/incline.nvim",
+    enabled = true,
+    dependencies = { "craftzdog/solarized-osaka.nvim" },
+    event = "BufReadPre",
+    priority = 1200,
+    config = function()
+      local colors = require("solarized-osaka.colors").setup()
+      require("incline").setup({
+        highlight = {
+          groups = {
+            InclineNormal = { guibg = colors.magenta500, guifg = colors.base04 },
+            InclineNormalNC = { guifg = colors.violet500, guibg = colors.base03 },
+          },
+        },
+        window = { margin = { vertical = 0, horizontal = 1 } },
+        hide = {
+          cursorline = true,
+        },
+        render = function(props)
+          local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":t")
+          if vim.bo[props.buf].modified then
+            filename = "[+] " .. filename
+          end
+
+          local icon, color = require("nvim-web-devicons").get_icon_color(filename)
+          return { { icon, guifg = color }, { " " }, { filename } }
+        end,
+      })
+    end,
+  },
+
   -- dashboard
   {
     "folke/snacks.nvim",
@@ -137,13 +180,13 @@ return {
           { icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
           -- Projects (プロジェクト履歴)
           { icon = " ", title = "Projects", section = "projects", indent = 2, padding = 1 },
-          -- Git Status の表示
+          -- Git Status の表示 (git repo の場合のみ)
           {
             icon = "󰊢 ",
             title = "Git Status",
             section = "terminal",
-            cmd = "git status -short",
-            pane = 2,
+            enabled = vim.fn.isdirectory(".git") == 1,
+            cmd = "git status --short",
             height = 5,
             padding = 1,
           },

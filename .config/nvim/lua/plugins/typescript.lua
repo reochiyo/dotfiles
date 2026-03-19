@@ -13,9 +13,17 @@ return {
     "neovim/nvim-lspconfig",
     opts = {
       servers = {
+        -- Deno LSP: deno.json がある場合のみ起動
+        denols = {
+          root_dir = require("lspconfig.util").root_pattern("deno.json", "deno.jsonc"),
+          single_file_support = false,
+        },
         -- vtsls は typescript-language-server の高速な代替
         -- LazyVim の typescript extra でデフォルト有効
+        -- package.json があるプロジェクトのみ起動（Deno と競合しないように）
         vtsls = {
+          root_dir = require("lspconfig.util").root_pattern("package.json"),
+          single_file_support = false,
           settings = {
             typescript = {
               -- インレイヒント（関数の引数名などを薄く表示）
@@ -49,6 +57,9 @@ return {
   -- Treesitter: JSX/TSXのシンタックスハイライト
   {
     "nvim-treesitter/nvim-treesitter",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter-textobjects",
+    },
     opts = {
       ensure_installed = {
         "typescript",
@@ -58,6 +69,24 @@ return {
         "css",
         "json",
         "jsonc",
+      },
+      textobjects = {
+        move = {
+          enable = true,
+          set_jumps = true,
+          goto_next_start = {
+            ["]f"] = "@function.outer",
+          },
+          goto_previous_start = {
+            ["[f"] = "@function.outer",
+          },
+          goto_next_end = {
+            ["]F"] = "@function.outer",
+          },
+          goto_previous_end = {
+            ["[F"] = "@function.outer",
+          },
+        },
       },
     },
   },

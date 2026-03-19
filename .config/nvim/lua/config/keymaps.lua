@@ -3,7 +3,7 @@
 -- Add any additional keymaps here
 local discipline = require("craftzdog.discipline")
 
-discipline.cowboy()
+-- discipline.cowboy()
 
 local keymap = vim.keymap
 local opts = { noremap = true, silent = true }
@@ -66,6 +66,22 @@ keymap.set("n", "<C-w><left>", "<C-w><")
 keymap.set("n", "<C-w><right>", "<C-w>>")
 keymap.set("n", "<C-w><up>", "<C-w>+")
 keymap.set("n", "<C-w><down>", "<C-w>-")
+
+-- Copy filename to clipboard
+keymap.set("n", "<Leader>yn", function()
+  vim.fn.setreg("+", vim.fn.expand("%:t"))
+  print("Copied: " .. vim.fn.expand("%:t"))
+end, { desc = "Copy filename" })
+
+keymap.set("n", "<Leader>yp", function()
+  vim.fn.setreg("+", vim.fn.expand("%:p"))
+  print("Copied: " .. vim.fn.expand("%:p"))
+end, { desc = "Copy full path" })
+
+-- Buffer delete
+keymap.set("n", "<Leader>bd", function()
+  Snacks.bufdelete()
+end, { desc = "Delete Buffer" })
 
 -- Diagnostics
 -- keymap.set("n", "<C-j>", function()
