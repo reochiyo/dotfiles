@@ -1,0 +1,16 @@
+onboarding = false
+
+[theme]
+name = "tokyo-night"
+auto_switch = false
+
+[ui.toast]
+delivery = "system"
+
+[keys]
+# space（workspace）の循環切り替え。prefix なしの 1 打鍵。
+# prefix+w の picker（開いて上下で選ぶ）が冗長だったため直接循環に寄せた。
+# prefixless バインドはペイン内のアプリにキーが届かなくなるので、
+# claude / shell / vim が使う ctrl+n / ctrl+p 系は使わない。
+previous_workspace = "ctrl+shift+left"
+next_workspace = "ctrl+shift+right"

@@ -5,7 +5,7 @@
 ## 含まれる設定
 
 - Neovim (LazyVim ベース)
-- tmux
+- Herdr (AI コーディングエージェント用ターミナルマルチプレクサ)
 - Karabiner-Elements
 
 ## Neovim キーマップ
@@ -70,53 +70,138 @@
 | n | `<C-w><up>` | ウィンドウ高さを拡大 |
 | n | `<C-w><down>` | ウィンドウ高さを縮小 |
 
-## tmux キーマップ
+## Herdr
 
-prefix は `<C-b>`（デフォルト）です。
+AI コーディングエージェント（Claude Code 等）を並列で動かすためのターミナルマルチプレクサ。
+tmux を置き換えるものとして導入した。設定は `.config/herdr/config.toml`。
 
-### セッション操作
+### なぜ tmux をやめたか
 
-| キー | 説明 |
-|------|------|
-| `prefix + d` | セッションをデタッチ |
-| `prefix + s` | セッション一覧を表示 |
-| `prefix + $` | セッション名を変更 |
+Zed のリモート SSH では、ターミナルパネルの Claude Code も Agent Panel の thread も
+SSH 切断で死ぬ（zed-industries/zed#20589 / #60413。Zed の永続ターミナル実装は
+ローカルシェル限定でリモートには効かない）。エージェントをエディタの外に出して
+デタッチ可能なマルチプレクサの中で動かす必要があり、その役割を herdr に寄せた。
 
-### ウィンドウ操作
+tmux との違いはエージェント状態の可視化。各 pane の前面プロセスを検出して
+`blocked` / `working` / `idle` / `done` を判定し、`blocked` は tab → space へ伝播するので、
+サイドバーを見るだけで「どの作業の Claude が入力待ちか」が分かる。
 
-| キー | 説明 |
-|------|------|
-| `prefix + c` | 新しいウィンドウを作成 |
-| `prefix + n` | 次のウィンドウへ |
-| `prefix + p` | 前のウィンドウへ |
-| `prefix + w` | ウィンドウ一覧を表示 |
-| `prefix + ,` | ウィンドウ名を変更 |
-| `prefix + &` | ウィンドウを閉じる |
-| `prefix + 0-9` | 番号でウィンドウを選択 |
+エディタ機能は持たない（pane は「本物のターミナル 1 つ」で、プラグインでもネイティブ UI は作れない）。
+コードの閲覧・編集は Zed や nvim を併用する。
 
-### ペイン操作
+### 階層
 
-| キー | 説明 |
-|------|------|
-| `prefix + %` | 垂直分割 |
-| `prefix + "` | 水平分割 |
-| `prefix + o` | 次のペインへ移動 |
-| `prefix + ;` | 直前のペインへ移動 |
-| `prefix + 矢印キー` | 矢印方向のペインへ移動 |
-| `prefix + x` | ペインを閉じる |
-| `prefix + z` | ペインをズーム（最大化/元に戻す） |
-| `prefix + {` | ペインを前に入れ替え |
-| `prefix + }` | ペインを後ろに入れ替え |
-| `prefix + Space` | ペインレイアウトを切り替え |
-| `prefix + <C-矢印キー>` | ペインサイズを調整 |
+| 階層 | 用途 | 分ける基準 |
+|------|------|-----------|
+| space (workspace) | トップレベルのプロジェクト container | repo / タスク / worktree ごと |
+| タブ | space 内のレイアウト | 同じ作業対象の別ビュー（agents / logs / review / test） |
+| pane | 実ターミナル 1 つ | 同じビュー内で並べて見たいもの |
 
-### コピーモード
+迷ったらタブ。pane 分割は幅を食うので、実際に見比べる必要があるときだけにする。
 
-vi キーバインドが有効になっています（`mode-keys vi`）。
+### キーマップ
+
+prefix は `<C-b>`（tmux と同じ）。
+
+#### space 操作（Shift 系）
 
 | キー | 説明 |
 |------|------|
-| `prefix + [` | コピーモード開始 |
-| `v` | 選択開始（コピーモード中） |
-| `y` | ヤンク（コピーモード中） |
-| `q` | コピーモード終了 |
+| `prefix + <S-n>` | 新しい space を作成 |
+| `prefix + w` | space 一覧から切り替え |
+| `prefix + g` | space へジャンプ（picker） |
+| `prefix + <S-w>` | space 名を変更 |
+| `prefix + <S-d>` | space を閉じる |
+| `prefix + b` | サイドバーの表示/非表示 |
+
+#### タブ操作
+
+| キー | 説明 |
+|------|------|
+| `prefix + c` | 新しいタブ |
+| `prefix + n` | 次のタブへ |
+| `prefix + p` | 前のタブへ |
+| `prefix + 1-9` | 番号でタブを選択 |
+| `prefix + <S-t>` | タブ名を変更 |
+| `prefix + <S-x>` | タブを閉じる |
+
+#### pane 操作
+
+| キー | 説明 |
+|------|------|
+| `prefix + v` | 右に分割 |
+| `prefix + -` | 下に分割 |
+| `prefix + h/j/k/l` | pane 間を移動 |
+| `prefix + <S-h/j/k/l>` | pane を入れ替え |
+| `prefix + r` | リサイズモード |
+| `prefix + z` | pane をズーム |
+| `prefix + x` | pane を閉じる |
+| `prefix + [` | コピーモード |
+
+#### セッション
+
+| キー | 説明 |
+|------|------|
+| `prefix + q` | デタッチ |
+| `prefix + ?` | ヘルプオーバーレイ（**このキーが常に正典**） |
+
+### カスタムキーバインド（config.toml の `[keys]`）
+
+| キー | 説明 |
+|------|------|
+| `<C-S-left>` | 前の space へ（prefix なし・1 打鍵） |
+| `<C-S-right>` | 次の space へ（prefix なし・1 打鍵） |
+
+既定の `prefix + w` は picker を開いて上下で選ぶ形で、space が数個のときは冗長だったため
+直接循環に寄せた。
+
+**prefixless バインドを選ぶときの制約**: prefix なしのキーは pane 内のアプリにキーが届かなくなる。
+Claude Code / shell / vim が使う `<C-n>` / `<C-p>` 系は避ける必要がある。
+`<C-S-left/right>` を選んだのはこのため。端末アプリ（WezTerm 等）側に先に奪われていないかは
+マシンごとに確認が必要。
+
+### Claude Code 連携
+
+エージェント状態の検出には 2 方式あり、精度が違う。
+
+1. lifecycle hooks — エージェント側から状態遷移を直接報告（正確）
+2. 画面バッファのパターン照合 — 端末下部を読んで推測（フォールバック。`blocked` を取りこぼす方向に倒してある）
+
+1 を有効にするには各マシンで以下を実行する（**dotfiles には含めない**。
+`~/.claude/hooks/herdr-agent-state.sh` は herdr 管理下で `herdr update` に上書きされるため）。
+
+```sh
+herdr integration install claude
+herdr integration status | grep claude   # current (vN) を確認
+```
+
+`~/.claude/settings.json` に `hooks.SessionStart` が 1 件追加されるだけで、プロジェクトの
+`.claude/settings.json` は変更されない。hook 自体は `HERDR_ENV=1` のときだけ動くので、
+herdr の外で起動した Claude Code には影響しない。
+
+なお `SessionStart` は起動時以外に `/clear`・コンテキスト圧縮・`--resume` でも発火するので、
+hook 導入前から動いているセッションも、そのいずれかの時点で自動的に hook 方式に切り替わる。
+
+### セットアップ
+
+```sh
+curl -fsSL https://herdr.dev/install.sh -o /tmp/herdr-install.sh
+# 中身を確認（sudo 不使用・~/.local/bin へ配置・SHA-256 検証のみ）してから
+sh /tmp/herdr-install.sh
+```
+
+`~/.local/bin` が `PATH` に入っていること。設定を書き換えたら `herdr server reload-config`。
+
+### 既知の問題
+
+- **リネーム入力欄でカーソルが動かない**（herdrdev/herdr#1803、未修正）。
+  `state.name_input` が単なる `String` で「末尾に足す / 末尾を削る」しか実装されておらず、
+  `Home` / `<C-a>` / 矢印キーが効かない。先頭に文字を足したいときは `<C-u>` で全消しして打ち直すか、
+  CLI の `herdr workspace rename` を使う（シェルの行編集が効く）。
+- Backspace の長押しリピートが効かない（#3417）。
+
+### 注意
+
+herdr 自身がこの config.toml に書き込むことがある（初回起動の `onboarding = false`、
+`herdr config reset-keys` は `[keys]` を削除する）。**コメントが保持される保証はない**ため、
+キーバインドの選定理由はこの README 側に持たせている。
